@@ -2,6 +2,8 @@
 
 [← Documentation](../index.md) · [README](../../README.md) · [Русский](guide.ru.md)
 
+[Complete API and defaults](reference.en.md)
+
 ## Task and result
 
 An order dashboard receives notifications while the user is signed in. A network interruption must not create a second subscription. If retained history expires, the UI must explain that a snapshot is needed. Switching accounts must not carry the previous account's cursor or notifications into the new view.
@@ -85,7 +87,7 @@ Mount this component below the provider. The host's restoreSnapshot callback mus
 
 The [recover function](../../examples/notifications/main.tsx) contains the complete runnable sequence. `resume` does not fetch or install state. The snapshot's cursor must represent exactly the state installed by the caller. The reference server reads both synchronously without an await; production servers need equivalent consistency.
 
-Default checkpoints are in memory and reset on scope changes, including A → B → A, and when the provider is disabled. Use stop() to pause while retaining the same cursor. Keep view state for the same provider/scope lifetime. If view state is cleared while the provider remains mounted, stop and restore a snapshot before resuming. If a new provider starts without a cursor, it can only replay the history that the server still retains; it cannot know about older missing business state. A complete dashboard should fetch an initial snapshot whenever retained history alone is insufficient.
+Default checkpoints are in memory and reset on scope changes, including A → B → A, and when the provider is disabled. Use stop() to pause while retaining the same cursor. Keep view state for the same provider/scope lifetime. If view state is cleared while the provider remains mounted, stop and restore a snapshot before resuming. If a new provider starts without a cursor, it can only replay the history that the server still retains; it cannot know about older missing business state. If origin was pruned, the reference server returns resync instead of silently replaying a partial log. A complete dashboard should fetch an initial snapshot whenever retained history alone is insufficient.
 
 A custom durable checkpoint deliberately survives account changes and provider remounts. It is only a position, not the corresponding application state. Restore state and cursor together, or obtain a fresh snapshot before enabling the provider. Never load a durable cursor into an empty view and pretend that replay reconstructs everything.
 
@@ -102,6 +104,10 @@ A custom durable checkpoint deliberately survives account changes and provider r
 The demo awaits logout, clears view state, then changes account. Failed checkpoint clearing prevents that action from claiming successful logout. Do not start another independent provider for the same checkpoint scope until cleanup has completed. React effect cleanup cannot itself be awaited by React: keep one provider for account replacement, or let the host coordinate remounts. The library serializes work inside one provider, not across tabs or separate providers.
 
 An in-flight asynchronous handler must inspect context.signal/context.isCurrent() before applying late effects and settle promptly on cancellation. Uncooperative handlers/stores delay teardown; the wrapper does not race them with another checkpoint writer. There is no rollback of already performed effects. After unmount, retained reconnect/resume actions do not start another connection.
+
+## Optional Activity: preserve a hidden dashboard
+
+The runnable demo uses React 19.3.1. Its Hide dashboard / Show dashboard buttons exercise Activity (React 19.2+): both notification state and provider stay inside the boundary, while effect cleanup closes SSE. Showing the panel replays events into the retained state. If history expired while hidden, recover a snapshot normally. This differs from enabled=false, which resets the default checkpoint. React18 users keep the ordinary provider example without Activity. [Exact lifecycle and source](reference.en.md#optional-react-192-activity-example).
 
 ## Verification and installation artifacts
 

@@ -1,4 +1,4 @@
-import { StrictMode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Activity, StrictMode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { SseRelayProvider, SseConnectionStatus, useSseRelay } from '@59alex/browser-sse-relay-react';
 import type { RelayContext, RelayEvent } from '@59alex/browser-sse-relay';
@@ -64,4 +64,15 @@ function Dashboard({ account, items, setItems, setAccount }: { account: string |
     <small>Cursor: <code data-testid="cursor">{relay.cursor ?? 'none'}</code>. Memory-only state and checkpoints share this provider's lifetime.</small>
   </>;
 }
-createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);
+// React 19.2+: preserve view state and the provider together while effects release the transport.
+// React 19.2+: сохраняем представление и provider вместе, пока очистка эффектов освобождает transport.
+function ActivityExample() {
+  const [visible, setVisible] = useState(true);
+  return <>
+    <div className="activity-controls"><button onClick={() => setVisible(value => !value)}>
+      {visible ? 'Hide dashboard' : 'Show dashboard'}
+    </button><small>React 19.2+ Activity: hidden view keeps state, closes its connection.</small></div>
+    <Activity mode={visible ? 'visible' : 'hidden'}><App /></Activity>
+  </>;
+}
+createRoot(document.getElementById('root')!).render(<StrictMode><ActivityExample /></StrictMode>);

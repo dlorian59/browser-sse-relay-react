@@ -22,7 +22,7 @@ try {
   assert.equal(snippets.length, 2);
   snippets.forEach((match, index) => writeFileSync(join(consumer, `readme-${index}.tsx`), match[1]));
   for (const locale of ['en', 'ru']) {
-    const guide = readFileSync(`docs/v0.1.0/guide.${locale}.md`, 'utf8');
+    const guide = readFileSync(`docs/v0.1.0/guide.${locale}.md`, 'utf8') + '\n' + readFileSync(`docs/v0.1.0/reference.${locale}.md`, 'utf8');
     [...guide.matchAll(/```tsx\n([\s\S]*?)```/g)].forEach((match, index) => writeFileSync(join(consumer, `guide-${locale}-${index}.tsx`), match[1]));
   }
   writeFileSync(join(consumer, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', jsx: 'react-jsx', strict: true, noEmit: true, skipLibCheck: true }, include: ['*.tsx'] }));

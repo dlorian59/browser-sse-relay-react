@@ -22,6 +22,13 @@ try {
   await page.getByRole('button',{name:'Create retention gap',exact:true}).click();
   await page.locator('[role=status][data-state=resync]').waitFor(); await count(1);
   await page.getByRole('button',{name:'Restore snapshot',exact:true}).click(); await live(); await count(7);
+  // Activity retains the domain view and checkpoint but releases the subscription while hidden.
+  // Activity сохраняет состояние и checkpoint, но освобождает подписку скрытого представления.
+  await page.getByRole('button',{name:'Hide dashboard',exact:true}).click();
+  await page.waitForFunction(async () => (await(await fetch('/api/stats',{headers:{Authorization:'Bearer demo-alice'}})).json()).subscribers===0);
+  await page.evaluate(async () => { const response = await fetch('/api/publish',{method:'POST',headers:{Authorization:'Bearer demo-alice'}}); if (!response.ok) throw new Error('Hidden publish failed'); });
+  await page.getByRole('button',{name:'Show dashboard',exact:true}).click(); await live(); await count(8);
+  assert.equal((await stats()).subscribers,1);
   await page.getByRole('button',{name:'Switch account',exact:true}).click(); await live(); await count(0);
   assert.equal(await page.getByTestId('account').textContent(),'bob');
   await page.getByRole('button',{name:'Publish notification',exact:true}).click(); await count(1);
@@ -29,7 +36,7 @@ try {
   await page.waitForFunction(async () => (await(await fetch('/api/stats',{headers:{Authorization:'Bearer demo-alice'}})).json()).subscribers===0);
   assert.equal(await page.getByTestId('cursor').textContent(),'none');assert.deepEqual(errors,[]);
   await mkdir('output',{recursive:true});
-  const result={browser:browser.version(),scenarios:['StrictMode single subscriber','unrelated render keeps connection','notification commit','disconnect reconnect','retention gap fails closed','snapshot restores seven notifications','account switch isolates state','logout closes subscription'],pageErrors:errors};
+  const result={browser:browser.version(),scenarios:['StrictMode single subscriber','unrelated render keeps connection','notification commit','disconnect reconnect','retention gap fails closed','snapshot restores seven notifications','Activity hide closes transport and show replays into retained state','account switch isolates state','logout closes subscription'],pageErrors:errors};
   await writeFile('output/browser-smoke.json',JSON.stringify(result,null,2)+'\n');
   console.log(result);
 } finally { await browser?.close(); await demo.close(); }

@@ -61,7 +61,11 @@ export class SessionOwner {
     const identity = config ? JSON.stringify([config.scope.accountId, config.scope.streamId]) : undefined;
     if (identity !== this.memoryScope) { this.memory = new MemoryCheckpointStore(); this.memoryScope = identity; }
     this.config = config;
-    if (!config) { void this.stop(); this.publish({ scope: null, cursor: undefined, state: 'idle' }); return () => {}; }
+    if (!config) {
+      void this.stop();
+      this.publish({ scope: null, cursor: undefined, state: 'idle', attempt: 0, result: undefined });
+      return () => {};
+    }
     this.begin(config);
     // StrictMode setup/cleanup/setup shares this lane and never overlaps checkpoint writers.
     // StrictMode setup/cleanup/setup использует одну очередь и не создаёт параллельных владельцев checkpoint.

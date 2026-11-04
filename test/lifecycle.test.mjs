@@ -83,3 +83,13 @@ test('default checkpoints are reset across scope changes, including returning to
   owner.configure(config(a,async(_url,init)=>{lastHeader=init.headers.get('Last-Event-ID');return response(a);}));
   await until(()=>owner.getSnapshot().state==='live');assert.equal(lastHeader,null);await owner.actions.stop();
 });
+test('disabling a failed account removes its terminal diagnostic and attempt from the snapshot',async()=>{
+  const owner=new SessionOwner();
+  owner.configure(config(a,async()=>new Response(null,{status:403})));
+  await until(()=>owner.getSnapshot().state==='failed');
+  assert.equal(owner.getSnapshot().result.reason,'authentication-failed');assert.equal(owner.getSnapshot().attempt,1);
+  owner.configure(null);
+  const snapshot=owner.getSnapshot();
+  assert.equal(snapshot.state,'idle');assert.equal(snapshot.scope,null);assert.equal(snapshot.result,undefined);assert.equal(snapshot.attempt,0);
+  await owner.actions.stop();
+});

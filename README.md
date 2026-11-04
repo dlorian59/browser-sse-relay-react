@@ -3,7 +3,7 @@
 <details name="readme-language">
 <summary><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lang-en-dark.svg"><img src="assets/lang-en-light.svg" width="42" height="26" alt="EN"></picture></summary>
 
-0.1.0 · [Guide / Руководство](docs/v0.1.0/guide.en.md) · [Versions / Версии](docs/index.md)
+0.1.0 · [Guide / Руководство](docs/v0.1.0/guide.en.md) · [API 0.1.0](docs/v0.1.0/reference.en.md) · [Versions / Версии](docs/index.md)
 
 React ownership for an SSE connection: one provider, an event handler, and a status component. Replay, checkpointing, authentication and protocol validation stay in browser-sse-relay.
 
@@ -28,6 +28,8 @@ npm run bootstrap
 npm test
 npm run demo
 ```
+
+The dev demo uses React 19.3.1; its optional Activity hide/show scenario requires React 19.2+. The library and minimal example remain compatible with React 18.3.
 
 Open the printed loopback URL. Publish a notification, disconnect, create a retention gap, then restore a snapshot. The [notification example](examples/notifications/main.tsx) and [reference server](examples/notifications/server.mjs) are executable source, not a documentation website.
 
@@ -71,7 +73,7 @@ MIT licensed. See [LICENSE](LICENSE).
 <details name="readme-language" open>
 <summary><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lang-ru-dark.svg"><img src="assets/lang-ru-light.svg" width="42" height="26" alt="RU"></picture></summary>
 
-0.1.0 · [Guide / Руководство](docs/v0.1.0/guide.ru.md) · [Versions / Версии](docs/index.md)
+0.1.0 · [Guide / Руководство](docs/v0.1.0/guide.ru.md) · [API 0.1.0](docs/v0.1.0/reference.ru.md) · [Versions / Версии](docs/index.md)
 
 Управление SSE-подключением в React: один provider, обработчик события и компонент статуса. Replay, checkpoint, аутентификация и проверка протокола остаются в browser-sse-relay.
 
@@ -96,6 +98,8 @@ npm run bootstrap
 npm test
 npm run demo
 ```
+
+Dev-демо использует React 19.3.1; необязательный Activity hide/show требует React 19.2+. Библиотека и минимальный пример сохраняют совместимость с React 18.3.
 
 Откройте напечатанный loopback URL. Создайте уведомление, оборвите соединение, исчерпайте историю и восстановите снимок. [Пример уведомлений](examples/notifications/main.tsx) и [reference server](examples/notifications/server.mjs) — исполняемые исходники, а не отдельный сайт документации.
 

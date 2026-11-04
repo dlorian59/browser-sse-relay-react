@@ -16,6 +16,8 @@ React state updates are asynchronous and not transactional with checkpoints. A d
 
 The public entry retains “use client”; only React 18.3-compatible hooks are used. This is a client boundary declaration, not a completed Next.js integration test. Stable APIs are documented by [React StrictMode](https://react.dev/reference/react/StrictMode) and [useSyncExternalStore](https://react.dev/reference/react/useSyncExternalStore).
 
+For React 19.2+ Activity, keep this provider and its domain view state inside the same boundary: hidden effects release the transport, visible effects resume against the retained state/checkpoint. The [runnable example and limits](v0.1.0/reference.en.md#optional-react-192-activity-example) are separate from the React 18 minimum.
+
 ## Русский
 
 Provider создаёт SessionOwner без браузерного I/O. useSyncExternalStore получает неизменяемый кешированный snapshot; SSR — фиксированное idle-состояние. Effect передаёт конфигурацию, cleanup делает её неактуальной. Действия, сохранённые после unmount, не начинают новую сессию. При смене аккаунта hook синхронно скрывает прежние статус/курсор ещё до passive effects.
@@ -29,5 +31,7 @@ Provider создаёт SessionOwner без браузерного I/O. useSyncE
 React state меняется асинхронно и не образует транзакцию с checkpoint. Обработчик должен быть идемпотентным; согласованность durable-эффектов и cursor storage задаёт приложение. Сохранённый курсор при потерянном состоянии требует recovery. Пример явно выполняет stop → согласованный снимок → применение состояния → resume соответствующего курсора.
 
 Entry сохраняет «use client»; используются hooks, доступные в React 18.3. Это объявление client boundary, не выполненная интеграционная проверка Next.js. Официальные описания API: [React StrictMode](https://react.dev/reference/react/StrictMode), [useSyncExternalStore](https://react.dev/reference/react/useSyncExternalStore).
+
+Для React 19.2+ Activity provider и бизнес-состояние размещаются внутри одной границы: hidden очищает transport effects, visible продолжает с сохранёнными состоянием/checkpoint. [Пример и ограничения](v0.1.0/reference.ru.md#отдельный-пример-activity-для-react-192) не повышают минимум React 18.
 
 [← Documentation / Документация](index.md) · [README](../README.md)
