@@ -1,0 +1,57 @@
+{
+  "name": "@59alex/browser-sse-relay-react",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "React lifecycle and accessible recovery status for browser-sse-relay",
+  "license": "MIT",
+  "author": "Aleksandr Kashevarov",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/59Alex/browser-sse-relay-react.git"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "docs",
+    "assets",
+    "examples",
+    "scripts"
+  ],
+  "peerDependencies": {
+    "@59alex/browser-sse-relay": "^0.1.0",
+    "react": "^18.3.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "playwright": "1.64.1"
+  },
+  "scripts": {
+    "bootstrap": "node scripts/bootstrap.mjs",
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "demo": "npm run build && node examples/notifications/server.mjs",
+    "test:browser": "npm run build && node scripts/browser-smoke.mjs",
+    "test:package": "node scripts/package-smoke.mjs",
+    "prepack": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

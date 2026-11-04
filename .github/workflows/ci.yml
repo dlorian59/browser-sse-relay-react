@@ -1,0 +1,26 @@
+name: Verify
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: browser-sse-relay-react
+      - uses: actions/checkout@v4
+        with:
+          repository: 59Alex/browser-sse-relay
+          path: browser-sse-relay
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm run bootstrap
+        working-directory: browser-sse-relay-react
+      - run: npm test && npm run test:package
+        working-directory: browser-sse-relay-react
+      - run: npx playwright install --with-deps chromium
+        working-directory: browser-sse-relay-react
+      - run: npm run test:browser
+        working-directory: browser-sse-relay-react
