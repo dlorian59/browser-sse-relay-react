@@ -7,7 +7,7 @@
 
 React ownership for an SSE connection: one provider, an event handler, and a status component. Replay, checkpointing, authentication and protocol validation stay in browser-sse-relay.
 
-**0.1.0 is a local source candidate. Public repository creation and npm publication are pending.**
+**0.1.0 source and examples are available in this repository. npm publication is pending; the guide covers local installation.**
 
 ## Capabilities
 
@@ -77,7 +77,7 @@ MIT licensed. See [LICENSE](LICENSE).
 
 Управление SSE-подключением в React: один provider, обработчик события и компонент статуса. Replay, checkpoint, аутентификация и проверка протокола остаются в browser-sse-relay.
 
-**0.1.0 — локально подготовленный код. Создание публичного репозитория и публикация npm ещё не выполнены.**
+**Исходники и примеры 0.1.0 доступны в этом репозитории. Публикация npm пока не выполнена; руководство описывает локальную установку.**
 
 ## Возможности
 
