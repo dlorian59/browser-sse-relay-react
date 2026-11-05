@@ -6,6 +6,7 @@
 |---|---|---|
 | 0.1.0 | [Notification dashboard guide](v0.1.0/guide.en.md) | [Уведомления: практическое руководство](v0.1.0/guide.ru.md) |
 
+- [Start with your existing application · EN](integration.en.md) / [Подключение к существующему приложению · RU](integration.ru.md)
 - [API reference 0.1.0 · EN](v0.1.0/reference.en.md) / [Справочник API 0.1.0 · RU](v0.1.0/reference.ru.md)
 - [Visual integrations · EN](visual.en.md) / [Визуальные интеграции · RU](visual.ru.md)
 - [Verification / Проверки](VERIFICATION.md)

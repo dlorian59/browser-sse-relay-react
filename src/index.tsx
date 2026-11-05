@@ -59,3 +59,5 @@ export function SseConnectionStatus({ labels, children, ...attributes }: SseConn
     {children ? children(value) : labels?.[value.state] ?? DEFAULT_LABELS[value.state]}
   </div>;
 }
+export { SseFeed, FeedDefaults } from './feed.js';
+export type { SseFeedProps, SseFeedSnapshot } from './feed.js';

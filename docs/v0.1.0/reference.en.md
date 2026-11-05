@@ -2,7 +2,12 @@
 
 [← Documentation](../index.md) · [Guide](guide.en.md) · [Русский](reference.ru.md) · [README](../../README.md)
 
-Public runtime exports: SseRelayProvider, useSseRelay, SseConnectionStatus. Public types: SseRelayProviderProps, SseRelayValue, SseConnectionStatusProps, RelayActions, RelaySnapshot, RelayTransportOptions. SessionOwner/SessionConfig are internal implementation details, not package exports. [Public source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/index.tsx), [lifecycle source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/session.ts).
+Public runtime exports: SseFeed, FeedDefaults, SseRelayProvider, useSseRelay, SseConnectionStatus. Public types: SseFeedProps, SseFeedSnapshot, SseRelayProviderProps, SseRelayValue, SseConnectionStatusProps, RelayActions, RelaySnapshot, RelayTransportOptions. SessionOwner/SessionConfig are internal implementation details, not package exports. [Public source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/index.tsx), [lifecycle source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/session.ts).
+
+
+## Ready live list
+
+`SseFeed<T>` owns a bounded upsert view and its memory checkpoint, with status/pause/reconnect/snapshot controls. `FeedDefaults.MAX_ITEMS` is 100; `SNAPSHOT_MAX_BYTES` is 1 MiB and `SNAPSHOT_TIMEOUT_MS` is 10 seconds. `snapshotMaxBytes` and `snapshotTimeoutMs` override these validated limits. HTTP snapshots are counted before JSON parsing and cancelled on overflow/deadline; custom SDK loaders must cooperate with the provided signal and own their memory limits. Types: `SseFeedProps<T>`, `SseFeedSnapshot` (matching scope, validated cursor, unknown items decoded before replacement). [Every prop, lifecycle and limitations](../integration.en.md#component-api) · [Full module](../../examples/orders/OrderNotifications.tsx). It does not accept an external checkpoint: a persistent cursor without persistent view state would skip needed records. Existing provider/hook APIs remain unchanged.
 
 ## Provider props and identity
 

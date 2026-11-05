@@ -27,7 +27,8 @@
     "docs",
     "assets",
     "examples",
-    "scripts"
+    "scripts",
+    "CONTRIBUTING.md"
   ],
   "peerDependencies": {
     "@59alex/browser-sse-relay": "^0.1.0",
@@ -47,10 +48,11 @@
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test test/*.test.mjs",
     "demo": "npm run build && node examples/notifications/server.mjs",
-    "test:browser": "npm run build && node scripts/browser-smoke.mjs",
+    "test:browser": "npm run build && node scripts/browser-smoke.mjs && node scripts/feed-smoke.mjs",
     "test:package": "node scripts/package-smoke.mjs",
     "prepack": "npm run build",
-    "docs:capture": "npm run build && node scripts/capture-docs.mjs"
+    "docs:capture": "npm run build && node scripts/capture-docs.mjs",
+    "docs:capture:feed": "npm run build && node scripts/feed-smoke.mjs --record"
   },
   "publishConfig": {
     "access": "public"

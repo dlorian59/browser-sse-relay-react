@@ -2,7 +2,12 @@
 
 [← Документация](../index.md) · [Руководство](guide.ru.md) · [English](reference.en.md) · [README](../../README.md)
 
-Runtime exports: SseRelayProvider, useSseRelay, SseConnectionStatus. Типы: SseRelayProviderProps, SseRelayValue, SseConnectionStatusProps, RelayActions, RelaySnapshot, RelayTransportOptions. SessionOwner/SessionConfig — внутренние детали, не exports пакета. [Public source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/index.tsx), [жизненный цикл](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/session.ts).
+Runtime exports: SseFeed, FeedDefaults, SseRelayProvider, useSseRelay, SseConnectionStatus. Типы: SseFeedProps, SseFeedSnapshot, SseRelayProviderProps, SseRelayValue, SseConnectionStatusProps, RelayActions, RelaySnapshot, RelayTransportOptions. SessionOwner/SessionConfig — внутренние детали, не exports пакета. [Public source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/index.tsx), [жизненный цикл](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/session.ts).
+
+
+## Готовый обновляемый список
+
+`SseFeed<T>` хранит ограниченный список с заменой по ключу и его checkpoint в памяти; включает статус, паузу, подключение и восстановление. `FeedDefaults.MAX_ITEMS` равен 100; `SNAPSHOT_MAX_BYTES` — 1 MiB, `SNAPSHOT_TIMEOUT_MS` — 10 секунд. Проверяемые `snapshotMaxBytes` и `snapshotTimeoutMs` меняют эти пределы. HTTP-снимок ограничивается до разбора JSON и отменяется при превышении объёма/срока; SDK-загрузчик должен учитывать переданный signal и ограничивать свою память. Типы: `SseFeedProps<T>`, `SseFeedSnapshot` (совпадающая область, проверяемый курсор, unknown items с декодированием до замены). [Все props, срок жизни и ограничения](../integration.ru.md#component-api) · [Полный модуль](../../examples/orders/OrderNotifications.tsx). Внешний checkpoint не принимается: постоянный курсор без постоянных данных пропустил бы нужные записи. Существующие provider/hook API не меняются.
 
 ## Props provider и идентичность
 

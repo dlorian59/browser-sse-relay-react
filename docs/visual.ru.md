@@ -4,10 +4,20 @@
 
 Записи показывают настоящий React-пример, SseRelayClient и локальный Node reference relay. Аккаунты и уведомления — синтетические fixture-данные, не production. Защищённые запросы используют DPoP; [создание сессии](../examples/notifications/auth.ts) и [verifier](../examples/notifications/dpop-auth.mjs) — исполняемые fixtures. UI в обеих версиях остаётся английским: у каждой записи один воспроизводимый исходник. При reduced motion используется PNG, если Markdown-host поддерживает picture media; для каждой записи есть обычная ссылка на статичный кадр.
 
+
+## SseFeed: готовые уведомления о заказах
+
+Компонент обслуживает список, статус соединения и кнопки восстановления. Модуль приложения задаёт бизнес-поля, ключ, вид строки и существующий авторизованный транспорт. [Полный код](../examples/orders/OrderNotifications.tsx) · [Структура и пошаговый разбор](integration.ru.md).
+
+<picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/feed.png"><img src="assets/feed.gif" width="800" alt="Список получает события, приостанавливается, восстанавливает снимок и меняет аккаунт"></picture>
+
+[Статичное изображение](assets/feed.png). Запись открывает `/feed.html`, публикует обновление, разрывает сеть, включает паузу, удаляет старую историю, переподключается, восстанавливает семь записей и переходит на пустой второй аккаунт. Используются настоящий DPoP fixture и SseFeed, состояния интерфейса не подменяются. Воспроизведение: `npm run docs:capture:feed`, [инструкции разработки](../CONTRIBUTING.md).
+
 ## Карта публичного API
 
 | Export | Что видно | Интеграция |
 |---|---|---|
+| SseFeed | Готовый список, управление соединением и проверяемое восстановление снимка. | [Интеграция](integration.ru.md) |
 | SseRelayProvider | Дочерняя панель получает scoped connection; смена аккаунта очищает представление, logout останавливает доставку. Собственного DOM у provider нет. | [Provider](#sserelayprovider) |
 | SseConnectionStatus | Подключение, штатная работа, обрыв/reconnect и необходимость снимка. | [Статус](#sseconnectionstatus) |
 | useSseRelay | Действия меняют состояние подключения: stop/reconnect, resume снимка и logout выполняются приложением явно. | [Действия](#usesserelay) |

@@ -25,6 +25,9 @@ try {
     const guide = readFileSync(`docs/v0.1.0/guide.${locale}.md`, 'utf8') + '\n' + readFileSync(`docs/v0.1.0/reference.${locale}.md`, 'utf8') + '\n' + readFileSync(`docs/visual.${locale}.md`, 'utf8');
     [...guide.matchAll(/```tsx\n([\s\S]*?)```/g)].forEach((match, index) => writeFileSync(join(consumer, `guide-${locale}-${index}.tsx`), match[1]));
   }
+  // Compile the exact application module from the packaged example, not a hand-rewritten substitute.
+  // Компилируем именно модуль приложения из пакета, а не переписанный специально для теста вариант.
+  writeFileSync(join(consumer, 'OrderNotifications.tsx'), readFileSync(join(installed, 'examples/orders/OrderNotifications.tsx'), 'utf8'));
   writeFileSync(join(consumer, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', jsx: 'react-jsx', strict: true, noEmit: true, skipLibCheck: true }, include: ['*.tsx'] }));
   execFileSync(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '-p', consumer], { encoding: 'utf8', stdio: 'inherit' });
   writeFileSync(join(consumer, 'smoke.mjs'), `import assert from 'node:assert/strict';

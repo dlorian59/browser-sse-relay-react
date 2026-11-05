@@ -28,6 +28,24 @@ Not verified: Firefox/Safari, Next.js application runtime, production authentica
 
 [← Documentation / Документация](index.md) · [README](../README.md)
 
+## Snapshot bounds follow-up — 2026-11-05
+
+The built-in snapshotUrl path now has named, validated byte/deadline limits (1 MiB / 10 seconds). Content-Length and actual streamed bytes are checked before JSON parsing; a quiet response is aborted and its reader cancelled. Oversize/timeout keep the previous view and cursor and re-enable recovery. Custom SDK loaders receive the same deadline signal and must cooperate with cancellation; their own allocations remain their responsibility.
+
+Seven focused checks passed and the real Chromium feed workflow passed after the follow-up. Checks cover declared and streamed overflow/cancel, a silent body deadline, fragmented UTF-8 at the exact byte limit, invalid bounds, and the real Chromium ready-feed workflow. Browser recovery rejects an oversized response and a delayed request without replacing the old list, then accepts a valid snapshot; existing scope and late-response checks remain in that workflow. The review also found and fixed a UI edge: the restore button now remains visible with its working label while the old relay transitions to closed. No unrelated matrix was rerun for this follow-up.
+
+
+## Ready feed integration — 2026-11-05
+
+`SseFeed` adds an owned bounded keyed view, status and native controls over the existing provider. `snapshotUrl` uses the configured authenticated GET transport/headers/credentials; custom SDK loaders use the alternative `loadSnapshot`. Scope/cursor/items are checked before synchronous view replacement and resume. Conflicting loaders fail explicitly. The view and private checkpoint reset together on scope/maxItems replacement.
+
+Validated: 12 unit/SSR checks; the existing 9 Chromium scenarios; an additional real DPoP feed workflow (delivery, reconnect, pause, retention gap, snapshot, account switch, wrong-account snapshot rejection and late snapshot cancellation). Clean packed React18.3.1 consumer compiled all README/guide/reference/visual snippets and the exact packaged `OrderNotifications.tsx`. Local TypeScript compiled the actual feed entry. Registry metadata temporarily stalled; the clean consumer passed using the existing npm cache in offline mode, without changing dependency versions.
+
+`docs/assets/feed.gif` and PNG were recorded from the actual `/feed.html` example using the snapshotUrl integration. No page exceptions; owned server/browser processes closed. Capture source: `scripts/feed-smoke.mjs --record`. Previous three animations still demonstrate the lower-level APIs. Production OAuth/storage and additional browsers were not newly verified.
+
+Проверено: готовый список, обработка JSON до checkpoint, DPoP, восстановление и изоляция аккаунтов. README предназначен для существующего проекта; команды разработки вынесены отдельно. Полный модуль и исходники примера компилируются; снимки интерфейса получены из работающего браузера.
+
+
 ## Initial visual guide capture · 2026-11-05 · before DPoP migration
 
 All three public runtime exports are covered: provider → provider.gif, status → recovery.gif, hook actions → shared recovery.gif plus provider.gif for logout. React Activity (not a library export) → activity.gif. Assets are actual headless Chromium 156.0.8078.4 recordings of the Node loopback fixture and React 19.3.1, at 800×760. The capture script verifies account isolation, notification counts, reconnect attempts, resync, seven-item snapshot restoration, zero hidden subscribers, one resumed subscriber and replayed hidden publication. No page errors. GIF sizes: provider 1,412,340 bytes; recovery 1,597,208; Activity 1,229,032. Three PNG fallbacks; no binary duplicates.

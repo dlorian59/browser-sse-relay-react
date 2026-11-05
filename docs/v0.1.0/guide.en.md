@@ -6,6 +6,8 @@
 
 [Visual integrations / Визуальные интеграции](../visual.en.md)
 
+[First integration: purpose, project structure and a working module](../integration.en.md).
+
 ## Task and result
 
 An order dashboard receives notifications while the user is signed in. A network interruption must not create a second subscription. If retained history expires, the UI must explain that a snapshot is needed. Switching accounts must not carry the previous account's cursor or notifications into the new view.

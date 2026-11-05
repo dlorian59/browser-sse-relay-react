@@ -4,16 +4,26 @@
 
 These recordings use the real React example, SseRelayClient and loopback Node reference relay. Accounts and notifications are synthetic fixtures, not production data. Protected requests use DPoP; [session setup](../examples/notifications/auth.ts) and [verifier](../examples/notifications/dpop-auth.mjs) are runnable fixtures. The UI stays in English in both guides so each recording has one reproducible source. Reduced-motion readers receive a PNG where the Markdown host supports picture media; every recording also has a direct static link.
 
+
+## SseFeed: ready order notifications
+
+The component owns the list, connection status and recovery buttons. Your module supplies only business decoding/key/render and the existing authenticated transport. [Complete module](../examples/orders/OrderNotifications.tsx) · [Project structure and walkthrough](integration.en.md).
+
+<picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/feed.png"><img src="assets/feed.gif" width="800" alt="Ready order feed receives events, pauses, restores a snapshot and switches account"></picture>
+
+[Static image](assets/feed.png). The recording opens `/feed.html`, publishes an update, disconnects, pauses, expires retained history, reconnects, restores seven records and switches to an empty second account. It uses the real DPoP fixture and SseFeed; no UI state is forged. Reproduce with `npm run docs:capture:feed` from [development instructions](../CONTRIBUTING.md).
+
 ## Public API map
 
 | Export | What you see | Integration |
 |---|---|---|
+| SseFeed | Ready list, connection controls and validated snapshot recovery. | [Integration](integration.en.md) |
 | SseRelayProvider | Children receive one scoped connection; account switch clears the view, logout stops delivery. The provider renders no DOM of its own. | [Provider](#sserelayprovider) |
 | SseConnectionStatus | Connecting, healthy, interruption/reconnect and snapshot-required feedback. | [Status](#sseconnectionstatus) |
 | useSseRelay | Actions change connection state; stop/reconnect, snapshot resume and logout remain deliberate application operations. | [Actions](#usesserelay) |
 | Activity — React export, 19.2+ | Hiding retains provider/view state but closes effects; showing replays the event published while hidden. | [Activity](#activity--react-192) |
 
-These are all three runtime exports of the library. Props/value/action interfaces are types, not extra visual components. The first two are components; useSseRelay is a hook whose behavior is visible through the host's controls.
+These are the three lower-level connection exports; SseFeed and FeedDefaults provide the ready-list layer above. Props/value/action interfaces are types, not extra visual components. The first two are components; useSseRelay is a hook whose behavior is visible through the host's controls.
 
 ## SseRelayProvider
 
