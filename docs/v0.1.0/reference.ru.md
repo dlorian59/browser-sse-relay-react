@@ -2,7 +2,7 @@
 
 [← Документация](../index.md) · [Руководство](guide.ru.md) · [English](reference.en.md) · [README](../../README.md)
 
-Runtime exports: SseRelayProvider, useSseRelay, SseConnectionStatus. Типы: SseRelayProviderProps, SseRelayValue, SseConnectionStatusProps, RelayActions, RelaySnapshot, RelayTransportOptions. SessionOwner/SessionConfig — внутренние детали, не exports пакета. [Public source](https://github.com/59Alex/browser-sse-relay-react/blob/main/src/index.tsx), [жизненный цикл](https://github.com/59Alex/browser-sse-relay-react/blob/main/src/session.ts).
+Runtime exports: SseRelayProvider, useSseRelay, SseConnectionStatus. Типы: SseRelayProviderProps, SseRelayValue, SseConnectionStatusProps, RelayActions, RelaySnapshot, RelayTransportOptions. SessionOwner/SessionConfig — внутренние детали, не exports пакета. [Public source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/index.tsx), [жизненный цикл](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/session.ts).
 
 ## Props provider и идентичность
 
@@ -18,7 +18,7 @@ Runtime exports: SseRelayProvider, useSseRelay, SseConnectionStatus. Типы: S
 
 Default checkpoint и view state должны жить одинаково. Переданный durable store сохраняет собственную политику; wrapper не удаляет все scopes при смене аккаунта. Одинаковый scope у разных providers/вкладок требует внешней координации. Сохранённые actions не запускают transport после cleanup/unmount; новые эффекты могут настроить следующую сессию. Смена аккаунта синхронно скрывает старый snapshot при render; отключение очищает также terminal diagnostic и attempt.
 
-RelayTransportOptions исключает scope/url/onEvent/checkpoint/onState/initialCursor. Используйте props, resume() и наблюдение через hook. [Базовый API и defaults](https://github.com/59Alex/browser-sse-relay/blob/main/docs/v0.1.0/reference.ru.md).
+RelayTransportOptions исключает scope/url/onEvent/checkpoint/onState/initialCursor. Используйте props, resume() и наблюдение через hook. [Базовый API и defaults](https://github.com/dlorian59/browser-sse-relay/blob/main/docs/v0.1.0/reference.ru.md).
 
 | transport | Унаследованное значение / назначение |
 |---|---|

@@ -8,7 +8,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/59Alex/browser-sse-relay-react.git"
+    "url": "git+https://github.com/dlorian59/browser-sse-relay-react.git"
   },
   "engines": {
     "node": ">=22.12"

@@ -2,7 +2,7 @@
 
 [← Documentation](../index.md) · [Guide](guide.en.md) · [Русский](reference.ru.md) · [README](../../README.md)
 
-Public runtime exports: SseRelayProvider, useSseRelay, SseConnectionStatus. Public types: SseRelayProviderProps, SseRelayValue, SseConnectionStatusProps, RelayActions, RelaySnapshot, RelayTransportOptions. SessionOwner/SessionConfig are internal implementation details, not package exports. [Public source](https://github.com/59Alex/browser-sse-relay-react/blob/main/src/index.tsx), [lifecycle source](https://github.com/59Alex/browser-sse-relay-react/blob/main/src/session.ts).
+Public runtime exports: SseRelayProvider, useSseRelay, SseConnectionStatus. Public types: SseRelayProviderProps, SseRelayValue, SseConnectionStatusProps, RelayActions, RelaySnapshot, RelayTransportOptions. SessionOwner/SessionConfig are internal implementation details, not package exports. [Public source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/index.tsx), [lifecycle source](https://github.com/dlorian59/browser-sse-relay-react/blob/main/src/session.ts).
 
 ## Provider props and identity
 
@@ -18,7 +18,7 @@ Public runtime exports: SseRelayProvider, useSseRelay, SseConnectionStatus. Publ
 
 The default memory checkpoint and view state must share a lifetime. A supplied durable store has its own policy; the wrapper does not erase all scopes on identity change. Same-scope providers or tabs require external single-writer coordination. Retained actions cannot reconnect after effect cleanup/unmount; re-created effects may configure a new run. Account changes mask previous snapshot fields synchronously during render; disabling resets terminal diagnostics and attempt as well as scope/cursor.
 
-Transport options deliberately omit scope/url/onEvent/checkpoint/onState/initialCursor. Pass those through provider props or resume(), observe state with the hook. [Base API/defaults](https://github.com/59Alex/browser-sse-relay/blob/main/docs/v0.1.0/reference.en.md).
+Transport options deliberately omit scope/url/onEvent/checkpoint/onState/initialCursor. Pass those through provider props or resume(), observe state with the hook. [Base API/defaults](https://github.com/dlorian59/browser-sse-relay/blob/main/docs/v0.1.0/reference.en.md).
 
 | transport field | Inherited default / purpose |
 |---|---|

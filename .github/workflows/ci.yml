@@ -11,7 +11,7 @@ jobs:
           path: browser-sse-relay-react
       - uses: actions/checkout@v4
         with:
-          repository: 59Alex/browser-sse-relay
+          repository: dlorian59/browser-sse-relay
           path: browser-sse-relay
       - uses: actions/setup-node@v4
         with:
