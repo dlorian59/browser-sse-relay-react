@@ -3,11 +3,27 @@
 <details name="readme-language">
 <summary><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lang-en-dark.svg"><img src="assets/lang-en-light.svg" width="42" height="26" alt="EN"></picture></summary>
 
-0.1.0 · [Guide / Руководство](docs/v0.1.0/guide.en.md) · [API 0.1.0](docs/v0.1.0/reference.en.md) · [Versions / Версии](docs/index.md)
+0.1.0 · [Guide](docs/v0.1.0/guide.en.md) · [API 0.1.0](docs/v0.1.0/reference.en.md) · [Versions](docs/index.md)
 
 React ownership for an SSE connection: one provider, an event handler, and a status component. Replay, checkpointing, authentication and protocol validation stay in browser-sse-relay.
 
 **0.1.0 source and examples are available in this repository. npm publication is pending; the guide covers local installation.**
+
+<picture>
+  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/recovery.png">
+  <img src="docs/assets/recovery.gif" width="800" height="760" alt="Real SSE demo: disconnect, reconnect, expired history and snapshot recovery">
+</picture>
+
+[Static frame](docs/assets/recovery.png) · [Visual guide](docs/visual.en.md) · [Minimal integration](#minimal-integration)
+
+Recorded from the real loopback demo with synthetic accounts. A snapshot restores expired history; the client does not replay deleted events. The visual guide explains the English interface and each action.
+
+| Public API | Visual integration |
+|---|---|
+| SseRelayProvider | [Scoped children](docs/visual.en.md#sserelayprovider) |
+| SseConnectionStatus | [Connection and recovery](docs/visual.en.md#sseconnectionstatus) |
+| useSseRelay | [Actions](docs/visual.en.md#usesserelay) |
+| Activity · optional React 19.2+ | [Hide and show](docs/visual.en.md#activity--react-192) |
 
 ## Capabilities
 
@@ -73,11 +89,27 @@ MIT licensed. See [LICENSE](LICENSE).
 <details name="readme-language" open>
 <summary><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lang-ru-dark.svg"><img src="assets/lang-ru-light.svg" width="42" height="26" alt="RU"></picture></summary>
 
-0.1.0 · [Guide / Руководство](docs/v0.1.0/guide.ru.md) · [API 0.1.0](docs/v0.1.0/reference.ru.md) · [Versions / Версии](docs/index.md)
+0.1.0 · [Руководство](docs/v0.1.0/guide.ru.md) · [API 0.1.0](docs/v0.1.0/reference.ru.md) · [Версии](docs/index.md)
 
 Управление SSE-подключением в React: один provider, обработчик события и компонент статуса. Replay, checkpoint, аутентификация и проверка протокола остаются в browser-sse-relay.
 
 **Исходники и примеры 0.1.0 доступны в этом репозитории. Публикация npm пока не выполнена; руководство описывает локальную установку.**
+
+<picture>
+  <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/recovery.png">
+  <img src="docs/assets/recovery.gif" width="800" height="760" alt="Настоящее SSE-демо: обрыв, переподключение, потеря истории и восстановление снимком">
+</picture>
+
+[Статичный кадр](docs/assets/recovery.png) · [Визуальное руководство](docs/visual.ru.md) · [Минимальное подключение](#минимальное-подключение)
+
+Запись настоящего локального демо с синтетическими аккаунтами. Потерянная история восстанавливается снимком, а не повторной доставкой удалённых событий. Интерфейс записи английский; русское руководство объясняет каждое действие.
+
+| Публичный API | Визуальная интеграция |
+|---|---|
+| SseRelayProvider | [Дочерняя панель и аккаунты](docs/visual.ru.md#sserelayprovider) |
+| SseConnectionStatus | [Подключение и восстановление](docs/visual.ru.md#sseconnectionstatus) |
+| useSseRelay | [Действия](docs/visual.ru.md#usesserelay) |
+| Activity · необязательно, React 19.2+ | [Скрытие и показ](docs/visual.ru.md#activity--react-192) |
 
 ## Возможности
 

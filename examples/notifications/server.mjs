@@ -12,7 +12,7 @@ export async function startDemo(port = 0) {
   const account = request => { const value = request.headers.authorization; return value === 'Bearer demo-alice' ? 'alice' : value === 'Bearer demo-bob' ? 'bob' : undefined; };
   const scope = identity => ({ accountId: identity, streamId: 'notifications' });
   const relay = createNodeRelay({ store, authenticate: account, stream: () => 'notifications', heartbeatMs: 100 });
-  const vite = await createViteServer({ configFile: false, root: fileURLToPath(new URL('.', import.meta.url)), server: { middlewareMode: true }, appType: 'spa' });
+  const vite = await createViteServer({ configFile: false, root: fileURLToPath(new URL('.', import.meta.url)), server: { middlewareMode: true, hmr: false }, appType: 'spa' });
   const json = (response, value, status = 200) => { response.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); response.end(JSON.stringify(value)); };
   const server = createServer((request, response) => {
     const path = new URL(request.url, 'http://localhost').pathname;

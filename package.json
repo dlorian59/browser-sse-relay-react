@@ -49,7 +49,8 @@
     "demo": "npm run build && node examples/notifications/server.mjs",
     "test:browser": "npm run build && node scripts/browser-smoke.mjs",
     "test:package": "node scripts/package-smoke.mjs",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "docs:capture": "npm run build && node scripts/capture-docs.mjs"
   },
   "publishConfig": {
     "access": "public"

@@ -27,3 +27,13 @@ Not verified: Firefox/Safari, Next.js application runtime, production authentica
 Не проверены Firefox/Safari, приложение Next.js, production-auth, durable/distributed event storage, межвкладочное владение и согласованность снимка между процессами. React 18 проверен как установленный потребитель/SSR; интерактивный браузер использовал React 19. Проверки не доказывают exactly-once или durability.
 
 [← Documentation / Документация](index.md) · [README](../README.md)
+
+## Visual guide capture · 2026-11-05
+
+All three public runtime exports are covered: provider → provider.gif, status → recovery.gif, hook actions → shared recovery.gif plus provider.gif for logout. React Activity (not a library export) → activity.gif. Assets are actual headless Chromium 156.0.8078.4 recordings of the Node loopback fixture and React 19.3.1, at 800×760. The capture script verifies account isolation, notification counts, reconnect attempts, resync, seven-item snapshot restoration, zero hidden subscribers, one resumed subscriber and replayed hidden publication. No page errors. GIF sizes: provider 1,412,340 bytes; recovery 1,597,208; Activity 1,229,032. Three PNG fallbacks; no binary duplicates.
+
+Покрыты все три runtime exports: provider → provider.gif; статус → recovery.gif; hook actions используют тот же recovery.gif и provider.gif для logout. React Activity — отдельный сценарий activity.gif, не export библиотеки. Настоящий Chromium/Node fixture проверяет аккаунты, количество уведомлений, reconnect, resync, восстановление семи элементов снимком, отсутствие скрытых подписчиков и replay после показа. PNG дают статичный/reduced-motion вариант; бинарных дублей нет.
+
+`npm run docs:capture` uses only port 5183 and closes its fixture and headless browser. Capture injects a 650 ms request-forwarding delay and enables the clearly labeled 250 ms demo handler delay for legibility. No UI state or protocol payload is forged. Raw videos and evidence are ignored under output/visual-sse/. Run source is scripts/capture-docs.mjs. Subsequent existing browser suite: 9 scenarios passed. New integration source and the main demo typecheck; clean React18.3.1 consumer compiles six additional visual-guide snippets alongside the eight existing snippets. Runtime API is unchanged.
+
+`npm run docs:capture` использует только порт 5183 и закрывает свои процессы. Задержки для читаемости явно описаны; состояние UI и protocol payload не подменяются. Исходник записи — scripts/capture-docs.mjs. Существующие 9 browser-сценариев прошли; интеграционные примеры компилируются, установленный пакет с React18.3.1 проверяет шесть новых visual snippets и восемь прежних. Runtime API не менялся.

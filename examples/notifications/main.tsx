@@ -9,19 +9,24 @@ function App() {
   const [account, setAccount] = useState<string | null>('alice');
   const [items, setItems] = useState<Notice[]>([]);
   const [renders, setRenders] = useState(0);
-  const transport = useMemo(() => ({ headers: () => ({ Authorization: `Bearer demo-${account}` }), retry: { minDelayMs: 100, maxDelayMs: 300, maxAttempts: 8 } }), [account]);
-  const onEvent = useCallback((event: RelayEvent, context: RelayContext) => {
+  const [slowProcessing, setSlowProcessing] = useState(false);
+  const transport = useMemo(() => ({ headers: () => ({ Authorization: `Bearer demo-${account}` }), retry: { minDelayMs: 700, maxDelayMs: 1000, maxAttempts: 8 } }), [account]);
+  const onEvent = useCallback(async (event: RelayEvent, context: RelayContext) => {
     const value: unknown = JSON.parse(event.data);
     if (!value || typeof value !== 'object' || !('key' in value) || !('text' in value) || typeof value.key !== 'string' || typeof value.text !== 'string') throw new Error('Invalid notification');
+    // Optional demo latency makes awaited replay processing visible; it is not a production default.
+    // Необязательная задержка демо показывает awaited replay; это не production-настройка.
+    if (slowProcessing) await new Promise(resolve => setTimeout(resolve, 250));
     if (!context.isCurrent()) return;
     // Upsert by business identity makes a repeated delivery harmless to this view.
     // Upsert по бизнес-идентификатору делает повторную доставку безопасной для этого представления.
     const notice = value as Notice;
     setItems(previous => context.isCurrent() ? [...previous.filter(item => item.key !== notice.key), notice] : previous);
-  }, []);
+  }, [slowProcessing]);
   return <SseRelayProvider scope={account ? { accountId: account, streamId: 'notifications' } : null} url="/api/events" onEvent={onEvent} transport={transport}>
     <main><p className="eyebrow">browser-sse-relay-react · practical example</p><h1>Order notifications</h1>
       <p>Disconnect, exhaust retained history, then recover the complete dashboard snapshot.</p>
+      <label className="demo-setting"><input type="checkbox" checked={slowProcessing} onChange={event => setSlowProcessing(event.target.checked)} /> Slow processing · demo only, 250 ms per event</label>
       <Dashboard account={account} items={items} setItems={setItems} setAccount={setAccount} />
       <button onClick={() => setRenders(value => value + 1)}>Unrelated render ({renders})</button>
     </main>
@@ -48,7 +53,7 @@ function Dashboard({ account, items, setItems, setAccount }: { account: string |
     setItems(snapshot.items); relay.resume(snapshot.cursor);
   };
   return <>
-    <SseConnectionStatus className="connection" />
+    <div className="connection-row"><SseConnectionStatus className="connection" /><span className="attempt">Attempt {relay.attempt}</span></div>
     <p>Account: <strong data-testid="account">{account ?? 'signed out'}</strong> · <span data-testid="count">{items.length}</span> notices</p>
     <div className="actions">
       <button disabled={busy || !account} onClick={() => void action(async () => { await api('publish'); })}>Publish notification</button>
