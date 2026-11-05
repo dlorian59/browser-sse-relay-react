@@ -26,11 +26,13 @@ Transport options deliberately omit scope/url/onEvent/checkpoint/onState/initial
 | credentials | same-origin. |
 | signal | Absent; external abort stops the run. Reconnecting with an already-aborted signal still stops. |
 | refreshAuth | Absent; HTTP401 sync/async boolean refresh, bounded by connection budget. |
-| fetch | globalThis.fetch; compatible injectable implementation. |
+| fetch | globalThis.fetch; compatible injectable implementation. The DPoP integration supplies memoized createDpopFetch from the base package. |
 | connectTimeoutMs / idleTimeoutMs | 10000 / 45000; response-header wait / incoming-byte idle, not handler deadlines. |
 | retry | maxAttempts=8, minDelayMs=250, maxDelayMs=10000, jitter=0.2; total connections, not failures since last success. |
 | limits | maxFrameBytes=65536, maxQueuedEvents=128, maxQueuedBytes=1048576, dedupEntries=1024. |
 | random | Math.random; injectable jitter sample. |
+
+For proof-bound OAuth, use transport.fetch rather than a fixed auth header: [complete DPoP setup and ownership](guide.en.md#dpop-session-ownership). Generic headers remain supported for other application metadata. Key creation, token acquisition/refresh/revocation and key persistence belong to the host; the React provider does not implement an identity provider.
 
 ## Hook value and actions
 

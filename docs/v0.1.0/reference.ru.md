@@ -26,11 +26,13 @@ RelayTransportOptions исключает scope/url/onEvent/checkpoint/onState/in
 | credentials | same-origin. |
 | signal | Не задано; внешняя отмена останавливает run. Reconnect с уже отменённым signal тоже остановится. |
 | refreshAuth | Не задано; sync/async boolean после 401, в рамках retry budget. |
-| fetch | globalThis.fetch либо совместимая реализация. |
+| fetch | globalThis.fetch либо совместимая реализация. DPoP-интеграция передаёт мемоизированный createDpopFetch базового пакета. |
 | connectTimeoutMs / idleTimeoutMs | 10000 /45000; ожидание headers / входящих байтов, не deadline обработчика. |
 | retry | maxAttempts=8, minDelayMs=250, maxDelayMs=10000, jitter=0.2; общее число подключений. |
 | limits | maxFrameBytes=65536, maxQueuedEvents=128, maxQueuedBytes=1048576, dedupEntries=1024. |
 | random | Math.random; sample для jitter. |
+
+Для proof-bound OAuth используется transport.fetch, не постоянный auth header: [полное подключение DPoP](guide.ru.md#dpop-session-ownership). Generic headers поддерживаются для прочих метаданных. Создание/сохранение ключа, получение/refresh/revoke токена принадлежат приложению; provider не реализует identity provider.
 
 ## Hook и действия
 

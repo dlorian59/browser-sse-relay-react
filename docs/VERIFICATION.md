@@ -28,7 +28,7 @@ Not verified: Firefox/Safari, Next.js application runtime, production authentica
 
 [← Documentation / Документация](index.md) · [README](../README.md)
 
-## Visual guide capture · 2026-11-05
+## Initial visual guide capture · 2026-11-05 · before DPoP migration
 
 All three public runtime exports are covered: provider → provider.gif, status → recovery.gif, hook actions → shared recovery.gif plus provider.gif for logout. React Activity (not a library export) → activity.gif. Assets are actual headless Chromium 156.0.8078.4 recordings of the Node loopback fixture and React 19.3.1, at 800×760. The capture script verifies account isolation, notification counts, reconnect attempts, resync, seven-item snapshot restoration, zero hidden subscribers, one resumed subscriber and replayed hidden publication. No page errors. GIF sizes: provider 1,412,340 bytes; recovery 1,597,208; Activity 1,229,032. Three PNG fallbacks; no binary duplicates.
 
@@ -37,3 +37,13 @@ All three public runtime exports are covered: provider → provider.gif, status 
 `npm run docs:capture` uses only port 5183 and closes its fixture and headless browser. Capture injects a 650 ms request-forwarding delay and enables the clearly labeled 250 ms demo handler delay for legibility. No UI state or protocol payload is forged. Raw videos and evidence are ignored under output/visual-sse/. Run source is scripts/capture-docs.mjs. Subsequent existing browser suite: 9 scenarios passed. New integration source and the main demo typecheck; clean React18.3.1 consumer compiles six additional visual-guide snippets alongside the eight existing snippets. Runtime API is unchanged.
 
 `npm run docs:capture` использует только порт 5183 и закрывает свои процессы. Задержки для читаемости явно описаны; состояние UI и protocol payload не подменяются. Исходник записи — scripts/capture-docs.mjs. Существующие 9 browser-сценариев прошли; интеграционные примеры компилируются, установленный пакет с React18.3.1 проверяет шесть новых visual snippets и восемь прежних. Runtime API не менялся.
+
+## DPoP integration · 2026-11-05
+
+The React demo now uses createDpopFetch with application-owned P-256 keys and bound tokens. Its standalone copied verifier matches browser-sse-relay/demo/dpop-auth.mjs (plus provenance comments) and checks actual signatures and token/key binding, not header presence. OAuth is not implemented: local /api/login deliberately allows synthetic alice/bob selection. Protected fixture actions sign bodyless POST requests separately; one nonce retry is safe only because authentication precedes the fixture mutation. The production NotificationScope example accepts optional refreshAuth; the demo expires tokens after five minutes without OAuth refresh.
+
+React-демо использует createDpopFetch с ключами приложения и привязанными токенами. Копия verifier соответствует исходнику базового demo и проверяет настоящую подпись и token/key binding. Локальный выбор alice/bob не является OAuth. Bodyless POST подписываются отдельно; один nonce retry допустим здесь благодаря verify до мутации. Production wrapper принимает refreshAuth, а demo-токены истекают через пять минут без OAuth refresh.
+
+Validation: 9 lifecycle/SSR tests; 9 real Chromium scenarios with positive verified-request/nonce-challenge counters; actual scope switch, logout, reconnect, resync snapshot and Activity replay. Clean installed React18.3.1 consumer compiles the 14 README/guide/reference/visual snippets. main.tsx and integration.tsx typecheck. All three visual recordings were regenerated through DPoP: provider1,332,354 bytes; recovery1,814,880; Activity1,076,176, plus PNG fallbacks. Capture states/counts/subscriber assertions passed with no page errors. Historical capture sizes above refer to the preceding implementation; these are the current assets. Browser/server cleanup completed.
+
+Проверки: 9 lifecycle/SSR, 9 Chromium-сценариев со счётчиками проверенных proofs/nonce challenges; реальная смена аккаунта, logout, reconnect, снимок и Activity replay. React18.3.1 consumer компилирует 14 snippets. Примеры main/integration проходят typecheck. Три GIF/PNG пересняты с DPoP; старые размеры выше относятся к предыдущей записи. Ошибок страницы нет, свои процессы закрыты. Production OAuth, distributed nonce/replay storage и дополнительные браузеры не проверялись.

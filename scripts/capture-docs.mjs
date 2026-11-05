@@ -3,6 +3,7 @@ import { mkdir, stat, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { chromium } from 'playwright';
+import { fixtureApi, until } from './dpop-fixture-client.mjs';
 import { startDemo } from '../examples/notifications/server.mjs';
 
 // Record only our loopback fixture, with real client/relay state and synthetic demo accounts.
@@ -32,10 +33,7 @@ async function record(name, scenario) {
   const live = () => page.locator('[role=status][data-state=live]').waitFor();
   const count = n => page.waitForFunction(value => document.querySelector('[data-testid=count]')?.textContent === String(value), n);
   const hold = () => page.waitForTimeout(1100);
-  const api = (path, method = 'GET') => page.evaluate(async ({path,method}) => {
-    const response = await fetch(`/api/${path}`, {method,headers:{Authorization:'Bearer demo-alice'}});
-    if (!response.ok) throw new Error(`Fixture HTTP ${response.status}`); return response.json();
-  }, {path,method});
+  const api = (path, method = 'GET') => fixtureApi(page, path, method);
   const video = page.video();
   try {
     await page.goto(demo.url); await live(); await hold();
@@ -59,7 +57,7 @@ try {
     await click('Publish notification'); await count(1); await hold();
     await click('Switch account'); await live(); await count(0); assert.equal(await page.getByTestId('account').textContent(),'bob'); await hold();
     await click('Publish notification'); await count(1); await hold();
-    await click('Logout'); await count(0); await page.waitForFunction(async () => (await(await fetch('/api/stats',{headers:{Authorization:'Bearer demo-alice'}})).json()).subscribers===0); await hold();
+    await click('Logout'); await count(0); await until(async () => (await api('stats')).subscribers === 0); await hold();
   });
   await record('recovery', async ({page,click,live,count,hold,api}) => {
     await page.getByRole('checkbox').check();
@@ -74,7 +72,7 @@ try {
     await page.getByRole('checkbox').check();
     await click('Publish notification'); await count(1); await hold();
     await click('Hide dashboard');
-    await page.waitForFunction(async () => (await(await fetch('/api/stats',{headers:{Authorization:'Bearer demo-alice'}})).json()).subscribers===0);
+    await until(async () => (await api('stats')).subscribers === 0);
     await api('publish','POST'); await hold();
     await click('Show dashboard'); await live(); await count(2); assert.equal((await api('stats')).subscribers,1); await hold();
   });

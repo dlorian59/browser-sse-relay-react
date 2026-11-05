@@ -1,14 +1,21 @@
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import { createDpopFetch } from '@59alex/browser-sse-relay';
 import type { RelayOptions, StreamScope } from '@59alex/browser-sse-relay';
 import { SseRelayProvider, SseConnectionStatus, useSseRelay } from '@59alex/browser-sse-relay-react';
 
 // Keep this provider and the business state for the same lifetime; the host validates and applies events.
 // Provider и бизнес-состояние живут одинаково; проверку и применение событий выполняет приложение.
-export function NotificationScope({ scope, token, onEvent, children }: {
-  scope: StreamScope | null; token: string; onEvent: RelayOptions['onEvent']; children: ReactNode;
+export function NotificationScope({ scope, keyPair, getAccessToken, origin, refreshAuth, onEvent, children }: {
+  scope: StreamScope | null; keyPair: CryptoKeyPair; origin: string;
+  getAccessToken: (signal: AbortSignal) => string | Promise<string>;
+  refreshAuth?: RelayOptions['refreshAuth'];
+  onEvent: RelayOptions['onEvent']; children: ReactNode;
 }) {
-  const transport = useMemo(() => ({ headers: () => ({ Authorization: `Bearer ${token}` }) }), [token]);
+  // OAuth owns this bound token/key; every GET/reconnect receives a fresh proof, never a fixed header.
+  // OAuth владеет связанными token/key; каждый GET/reconnect получает новый proof, не постоянный header.
+  const transport = useMemo(() => ({ fetch: createDpopFetch({ keyPair, getAccessToken, origin }),
+    ...(refreshAuth ? { refreshAuth } : {}) }), [keyPair, getAccessToken, origin, refreshAuth]);
   return <SseRelayProvider scope={scope} url="/api/events" transport={transport} onEvent={onEvent}>
     {children}
   </SseRelayProvider>;

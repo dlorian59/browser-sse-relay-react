@@ -2,7 +2,7 @@
 
 [← Documentation](index.md) · [README](../README.md) · [Русский](visual.ru.md) · [API reference](v0.1.0/reference.en.md)
 
-These recordings use the real React example, SseRelayClient and loopback Node reference relay. Accounts and notifications are synthetic fixtures, not production data. The UI stays in English in both guides so each recording has one reproducible source. Reduced-motion readers receive a PNG where the Markdown host supports picture media; every recording also has a direct static link.
+These recordings use the real React example, SseRelayClient and loopback Node reference relay. Accounts and notifications are synthetic fixtures, not production data. Protected requests use DPoP; [session setup](../examples/notifications/auth.ts) and [verifier](../examples/notifications/dpop-auth.mjs) are runnable fixtures. The UI stays in English in both guides so each recording has one reproducible source. Reduced-motion readers receive a PNG where the Markdown host supports picture media; every recording also has a direct static link.
 
 ## Public API map
 
@@ -27,20 +27,27 @@ These are all three runtime exports of the library. Props/value/action interface
 
 Alice receives one notification. Switching to Bob waits for logout, clears the view and opens a new scoped session; Bob then receives his own notification. Logout leaves an empty signed-out view and the fixture reports zero subscribers. This behavior combines provider lifecycle with the host's explicit state clearing; the provider does not erase arbitrary application state.
 
-The following complete wrapper supplies scope, endpoint, current bearer headers and the application's awaited handler. Render ConnectionLabel and business content inside it. token is obtained by your application, not this package.
+The complete wrapper supplies scope, endpoint, a memoized DPoP fetch and the application's awaited handler. Render ConnectionLabel and business content inside it. OAuth owns the keyPair and its bound token; getAccessToken returns that token and must be stable. Each GET/reconnect signs a fresh proof, with one nonce-challenge retry. No fixed proof/header or fallback auth scheme is used. getAccessToken should obtain a nonexpired bound token through your SDK; optional refreshAuth handles an ordinary HTTP401 through that SDK and is separate from the nonce retry.
 
 ```tsx
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { createDpopFetch } from '@59alex/browser-sse-relay';
 import type { RelayOptions, StreamScope } from '@59alex/browser-sse-relay';
 import { SseRelayProvider } from '@59alex/browser-sse-relay-react';
 
 // Keep this provider and the business state for the same lifetime; the host validates and applies events.
 // Provider и бизнес-состояние живут одинаково; проверку и применение событий выполняет приложение.
-export function NotificationScope({ scope, token, onEvent, children }: {
-  scope: StreamScope | null; token: string; onEvent: RelayOptions['onEvent']; children: ReactNode;
+export function NotificationScope({ scope, keyPair, getAccessToken, origin, refreshAuth, onEvent, children }: {
+  scope: StreamScope | null; keyPair: CryptoKeyPair; origin: string;
+  getAccessToken: (signal: AbortSignal) => string | Promise<string>;
+  refreshAuth?: RelayOptions['refreshAuth'];
+  onEvent: RelayOptions['onEvent']; children: ReactNode;
 }) {
-  const transport = useMemo(() => ({ headers: () => ({ Authorization: `Bearer ${token}` }) }), [token]);
+  // OAuth owns this bound token/key; every GET/reconnect receives a fresh proof, never a fixed header.
+  // OAuth владеет связанными token/key; каждый GET/reconnect получает новый proof, не постоянный header.
+  const transport = useMemo(() => ({ fetch: createDpopFetch({ keyPair, getAccessToken, origin }),
+    ...(refreshAuth ? { refreshAuth } : {}) }), [keyPair, getAccessToken, origin, refreshAuth]);
   return <SseRelayProvider scope={scope} url="/api/events" transport={transport} onEvent={onEvent}>
     {children}
   </SseRelayProvider>;
@@ -157,6 +164,6 @@ For readable transient states, capture delays forwarding each SSE request by 650
 
 ## Reading the evidence
 
-The captures prove these local interactions, not production durability, distributed replay, exactly-once effects or every browser. The Node relay holds history in one process and uses fixed demo tokens. Network/retention policy, state consistency, credentials and idempotency belong to the application. A GIF has no interactive controls; use npm run demo to try the buttons. [Verification record](VERIFICATION.md).
+The captures prove these local interactions, not production durability, distributed replay, exactly-once effects or every browser. The Node relay holds history in one process. Synthetic login issues key-bound tokens; the copied demo verifier checks DPoP signatures, URL/method, token hash/binding, nonce, time and replay. Arbitrary account selection is a fixture, not OAuth identity verification. Network/retention policy, state consistency, credentials and idempotency belong to the application. A GIF has no interactive controls; use npm run demo to try the buttons. [Verification record](VERIFICATION.md).
 
 [← Documentation](index.md) · [README](../README.md) · [Русский](visual.ru.md)

@@ -24,7 +24,7 @@ npm run demo
 
 For another base checkout: `SSE_RELAY_SOURCE=/absolute/path/browser-sse-relay npm run bootstrap`. The script builds and packs that source into output/, then installs the artifact with React/Vite development dependencies. It does not replace the semver peer in package.json with a local file path. Development dependencies are version-pinned directly; no transitive lockfile is claimed for this bootstrap workflow.
 
-Open the loopback URL printed by the server. No desktop window opens automatically. The Vite app and HTTP API share one origin. Demo authentication accepts only the synthetic demo-alice and demo-bob bearer tokens; real applications must authenticate and authorize server-side.
+Open the loopback URL printed by the server. No desktop window opens automatically. The Vite app and HTTP API share one origin. The synthetic /api/login fixture issues an opaque DPoP-bound token for alice or bob and a supplied key thumbprint. Every protected request verifies signature, method/URL, token hash, token/key binding, time, nonce and replay. Arbitrary-account local login is not OAuth or real identity verification.
 
 ## Source map
 
@@ -44,13 +44,17 @@ Inline event callbacks are supported. Scope identity uses accountId and streamId
 
 ```tsx
 import { useMemo } from 'react';
+import { createDpopFetch } from '@59alex/browser-sse-relay';
 import { SseRelayProvider, SseConnectionStatus } from '@59alex/browser-sse-relay-react';
 
-export function AuthenticatedStream({ accountId, token }: { accountId: string; token: string }) {
+export function AuthenticatedStream({ accountId, keyPair, getAccessToken, origin }: {
+  accountId: string; keyPair: CryptoKeyPair; origin: string;
+  getAccessToken: (signal: AbortSignal) => string | Promise<string>;
+}) {
   const transport = useMemo(() => ({
-    headers: () => ({ Authorization: `Bearer ${token}` }),
+    fetch: createDpopFetch({ keyPair, getAccessToken, origin }),
     retry: { maxAttempts: 8, minDelayMs: 300, maxDelayMs: 3000 },
-  }), [token]);
+  }), [keyPair, getAccessToken, origin]);
   return <SseRelayProvider scope={{ accountId, streamId: 'notifications' }}
     url="/api/events" transport={transport} onEvent={event => { console.log(event.data); }}>
     <SseConnectionStatus />
@@ -58,7 +62,20 @@ export function AuthenticatedStream({ accountId, token }: { accountId: string; t
 }
 ```
 
-Expected: token changes replace the session after old work settles. Headers refresh on attempts through the existing base client. Optional transport.refreshAuth follows the base 401 contract. This wrapper neither acquires tokens nor authorizes a user by a client-supplied accountId.
+Expected: each GET/reconnect obtains the current bound token and a fresh proof; one DPoP nonce challenge is retried inside the fetch adapter. Keep keyPair, origin and getAccessToken stable; replacing any creates a new transport after old work settles. Optional transport.refreshAuth is the base token-refresh hook, separate from the nonce handshake. No fixed Authorization/DPoP header, fallback auth scheme or client-supplied accountId authorizes the user.
+
+<a id="dpop-session-ownership"></a>
+## DPoP session ownership
+
+OAuth belongs to the host: createDpopKeyPair() yields a nonextractable private P-256 key; getDpopThumbprint(keyPair) supplies the public binding thumbprint; obtain a token bound to that key through your authorization flow. Preserve the matching key while the token is in use. createDpopFetch({keyPair,getAccessToken,origin}) is a GET-only transport with fresh proofs, exact origin restriction, redirect rejection and one nonce-challenge retry. Use a memoized transport.fetch. Generic headers remain available for non-auth metadata; do not precompute a proof as a reusable header.
+
+[Core DPoP guide](https://github.com/dlorian59/browser-sse-relay/blob/main/docs/dpop.en.md) · [Typed React integration](../../examples/notifications/integration.tsx) · [Executable synthetic session](../../examples/notifications/auth.ts) · [Fixture verifier](../../examples/notifications/dpop-auth.mjs).
+
+The demo's login lets anyone select alice/bob locally, so it does not prove real identity. The fixture verifies ES256, htm/htu, ath, cnf.jkt, time, nonce and single-use jti with bounded state; it rejects other auth schemes. Its copied verifier is example code under MIT, not a package export or a production identity provider. The server derives proof URLs from its trusted loopback origin, not a Host header. Token expiry closes existing demo SSE responses. Production requires HTTPS, issuer/audience/token validation, key/token policy and replay/nonce storage suited to the deployment.
+
+The UI retains the same key/token through Activity hide/show. Account replacement waits for relay.logout(), clears the view and creates a separate bound session. Logout drops the UI's local identity; revoke server credentials through your OAuth integration as needed. getAccessToken should ask the host SDK for a valid token, refreshing proactively when needed with the same bound key. The NotificationScope example also accepts refreshAuth for ordinary HTTP401 token recovery; it must return true only after the SDK updates the token. The demo intentionally has no OAuth refresh: its tokens expire after five minutes. Secure-context Web Crypto is required (HTTPS or local loopback for the demo).
+
+The fixture's bodyless publish/drop/expire POSTs call createDpopProof directly. They retry only a first nonce challenge because verification happens before any fixture mutation. This is not a general POST replay transport. The GET adapter never broadens into arbitrary request-body retries.
 
 ## Status and recovery controls
 

@@ -2,7 +2,7 @@
 
 [← Документация](index.md) · [README](../README.md) · [English](visual.en.md) · [Справочник API](v0.1.0/reference.ru.md)
 
-Записи показывают настоящий React-пример, SseRelayClient и локальный Node reference relay. Аккаунты и уведомления — синтетические fixture-данные, не production. UI в обеих версиях остаётся английским: у каждой записи один воспроизводимый исходник. При reduced motion используется PNG, если Markdown-host поддерживает picture media; для каждой записи есть обычная ссылка на статичный кадр.
+Записи показывают настоящий React-пример, SseRelayClient и локальный Node reference relay. Аккаунты и уведомления — синтетические fixture-данные, не production. Защищённые запросы используют DPoP; [создание сессии](../examples/notifications/auth.ts) и [verifier](../examples/notifications/dpop-auth.mjs) — исполняемые fixtures. UI в обеих версиях остаётся английским: у каждой записи один воспроизводимый исходник. При reduced motion используется PNG, если Markdown-host поддерживает picture media; для каждой записи есть обычная ссылка на статичный кадр.
 
 ## Карта публичного API
 
@@ -27,20 +27,27 @@
 
 Alice получает уведомление. Переход к Bob ждёт logout, очищает представление и создаёт новую scoped-сессию; Bob получает своё уведомление. После выхода панель пуста, fixture показывает ноль подписчиков. Это совместная работа lifecycle provider и явной очистки состояния приложением; provider не удаляет произвольные бизнес-данные.
 
-Полная обёртка ниже задаёт scope, endpoint, актуальные bearer headers и awaited handler приложения. Разместите ConnectionLabel и бизнес-контент внутри. token получает ваше приложение, не пакет.
+Полная обёртка задаёт scope, endpoint, мемоизированный DPoP fetch и awaited handler приложения. Разместите ConnectionLabel и бизнес-контент внутри. OAuth владеет keyPair и связанным токеном; стабильный getAccessToken возвращает этот токен. Каждый GET/reconnect подписывает новый proof, допускается один nonce retry. Постоянного proof/header или fallback-схемы нет. getAccessToken получает непросроченный bound token через ваш SDK; необязательный refreshAuth обрабатывает обычный HTTP401 через SDK отдельно от nonce retry.
 
 ```tsx
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { createDpopFetch } from '@59alex/browser-sse-relay';
 import type { RelayOptions, StreamScope } from '@59alex/browser-sse-relay';
 import { SseRelayProvider } from '@59alex/browser-sse-relay-react';
 
 // Keep this provider and the business state for the same lifetime; the host validates and applies events.
 // Provider и бизнес-состояние живут одинаково; проверку и применение событий выполняет приложение.
-export function NotificationScope({ scope, token, onEvent, children }: {
-  scope: StreamScope | null; token: string; onEvent: RelayOptions['onEvent']; children: ReactNode;
+export function NotificationScope({ scope, keyPair, getAccessToken, origin, refreshAuth, onEvent, children }: {
+  scope: StreamScope | null; keyPair: CryptoKeyPair; origin: string;
+  getAccessToken: (signal: AbortSignal) => string | Promise<string>;
+  refreshAuth?: RelayOptions['refreshAuth'];
+  onEvent: RelayOptions['onEvent']; children: ReactNode;
 }) {
-  const transport = useMemo(() => ({ headers: () => ({ Authorization: `Bearer ${token}` }) }), [token]);
+  // OAuth owns this bound token/key; every GET/reconnect receives a fresh proof, never a fixed header.
+  // OAuth владеет связанными token/key; каждый GET/reconnect получает новый proof, не постоянный header.
+  const transport = useMemo(() => ({ fetch: createDpopFetch({ keyPair, getAccessToken, origin }),
+    ...(refreshAuth ? { refreshAuth } : {}) }), [keyPair, getAccessToken, origin, refreshAuth]);
   return <SseRelayProvider scope={scope} url="/api/events" transport={transport} onEvent={onEvent}>
     {children}
   </SseRelayProvider>;
@@ -157,6 +164,6 @@ npm run docs:capture
 
 ## Границы доказательства
 
-Записи подтверждают локальные действия, не production durability, distributed replay, exactly-once или все браузеры. Node relay хранит историю в одном процессе и использует фиксированные demo-токены. Network/retention policy, согласованность состояния, credentials и идемпотентность задаёт приложение. В GIF нельзя нажимать кнопки: для этого запускайте npm run demo. [Протокол проверок](VERIFICATION.md).
+Записи подтверждают локальные действия, не production durability, distributed replay, exactly-once или все браузеры. Node relay хранит историю в одном процессе. Synthetic login выдаёт key-bound tokens; verifier проверяет DPoP-подписи, URL/method, token hash/binding, nonce, время и replay. Произвольный выбор аккаунта — fixture, не OAuth-проверка личности. Network/retention policy, согласованность состояния, credentials и идемпотентность задаёт приложение. В GIF нельзя нажимать кнопки: для этого запускайте npm run demo. [Протокол проверок](VERIFICATION.md).
 
 [← Документация](index.md) · [README](../README.md) · [English](visual.en.md)

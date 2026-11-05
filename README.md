@@ -51,20 +51,28 @@ Open the printed loopback URL. Publish a notification, disconnect, create a rete
 
 ## Minimal integration
 
-The endpoint must implement browser-sse-relay protocol v1. Scope is the authenticated account and logical stream, not a way to authorize a request.
+The endpoint must implement browser-sse-relay protocol v1. Supply the application-owned DPoP key and getAccessToken callback returning an OAuth token bound to that key; memoize the callback and origin. The wrapper signs each GET/reconnect and handles one nonce challenge. accountId must come from the verified OAuth session and match the token. Scope is the authenticated account and logical stream, not authorization. [DPoP integration and lifecycle](docs/v0.1.0/guide.en.md#dpop-session-ownership).
 
 ```tsx
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { createDpopFetch } from '@59alex/browser-sse-relay';
 import { SseRelayProvider, SseConnectionStatus } from '@59alex/browser-sse-relay-react';
 
-export function Notifications() {
-  const [messages, setMessages] = useState<Record<string, string>>({});
+export function Notifications({ accountId, keyPair, getAccessToken, origin }: {
+  accountId: string; keyPair: CryptoKeyPair; origin: string;
+  getAccessToken: (signal: AbortSignal) => string | Promise<string>;
+}) {
+  const transport = useMemo(() => ({ fetch: createDpopFetch({ keyPair, getAccessToken, origin }) }),
+    [keyPair, getAccessToken, origin]);
+  const [view, setView] = useState<{ accountId: string; messages: Record<string, string> }>({ accountId, messages: {} });
+  const messages = view.accountId === accountId ? view.messages : {};
   return <SseRelayProvider
-    scope={{ accountId: 'authenticated-account', streamId: 'notifications' }}
-    url="/api/events"
+    scope={{ accountId, streamId: 'notifications' }}
+    url="/api/events" transport={transport}
     onEvent={(event, context) => {
-      if (context.isCurrent()) setMessages(previous =>
-        context.isCurrent() ? { ...previous, [event.id]: event.data } : previous);
+      if (context.isCurrent()) setView(previous => context.isCurrent() ? {
+        accountId, messages: { ...(previous.accountId === accountId ? previous.messages : {}), [event.id]: event.data },
+      } : previous);
     }}>
     <SseConnectionStatus />
     <ul>{Object.entries(messages).map(([id, text]) => <li key={id}>{text}</li>)}</ul>
@@ -80,7 +88,7 @@ React 18.3+/19 peer support, TypeScript declarations, ES2022 ESM. Tested with Re
 
 ## Boundaries
 
-Exactly-once effects, persistent application state, cross-tab ownership and distributed relay storage are not provided. Your awaited handler must be idempotent and cancellation-aware. A durable checkpoint needs matching application state. One provider owns a checkpoint scope; do not run independent providers against the same scope/store. The Node example uses synthetic demo tokens and an in-memory log, not production authentication or storage.
+Exactly-once effects, persistent application state, cross-tab ownership and distributed relay storage are not provided. Your awaited handler must be idempotent and cancellation-aware. A durable checkpoint needs matching application state. One provider owns a checkpoint scope; do not run independent providers against the same scope/store. The Node example verifies signed DPoP proofs and token/key binding, but its arbitrary-account login and in-memory log are synthetic fixtures, not production OAuth or storage.
 
 MIT licensed. See [LICENSE](LICENSE).
 
@@ -137,20 +145,28 @@ Dev-демо использует React 19.3.1; необязательный Act
 
 ## Минимальное подключение
 
-Endpoint должен поддерживать browser-sse-relay protocol v1. Scope обозначает авторизованный аккаунт и логический поток, но сам по себе не авторизует запрос.
+Endpoint должен поддерживать browser-sse-relay protocol v1. Передайте DPoP-ключ приложения и стабильный getAccessToken, возвращающий привязанный к этому ключу OAuth token. Transport подписывает каждый GET/reconnect и обрабатывает один nonce challenge. accountId берётся из проверенной OAuth-сессии и соответствует токену. Scope обозначает аккаунт и поток, но не заменяет auth. [DPoP и срок жизни сессии](docs/v0.1.0/guide.ru.md#dpop-session-ownership).
 
 ```tsx
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { createDpopFetch } from '@59alex/browser-sse-relay';
 import { SseRelayProvider, SseConnectionStatus } from '@59alex/browser-sse-relay-react';
 
-export function Notifications() {
-  const [messages, setMessages] = useState<Record<string, string>>({});
+export function Notifications({ accountId, keyPair, getAccessToken, origin }: {
+  accountId: string; keyPair: CryptoKeyPair; origin: string;
+  getAccessToken: (signal: AbortSignal) => string | Promise<string>;
+}) {
+  const transport = useMemo(() => ({ fetch: createDpopFetch({ keyPair, getAccessToken, origin }) }),
+    [keyPair, getAccessToken, origin]);
+  const [view, setView] = useState<{ accountId: string; messages: Record<string, string> }>({ accountId, messages: {} });
+  const messages = view.accountId === accountId ? view.messages : {};
   return <SseRelayProvider
-    scope={{ accountId: 'authenticated-account', streamId: 'notifications' }}
-    url="/api/events"
+    scope={{ accountId, streamId: 'notifications' }}
+    url="/api/events" transport={transport}
     onEvent={(event, context) => {
-      if (context.isCurrent()) setMessages(previous =>
-        context.isCurrent() ? { ...previous, [event.id]: event.data } : previous);
+      if (context.isCurrent()) setView(previous => context.isCurrent() ? {
+        accountId, messages: { ...(previous.accountId === accountId ? previous.messages : {}), [event.id]: event.data },
+      } : previous);
     }}>
     <SseConnectionStatus />
     <ul>{Object.entries(messages).map(([id, text]) => <li key={id}>{text}</li>)}</ul>
@@ -166,7 +182,7 @@ Peer-совместимость React 18.3+/19, типы TypeScript, ES2022 ESM.
 
 ## Границы
 
-Библиотека не предоставляет exactly-once эффекты, постоянное состояние приложения, владение между вкладками и распределённое хранилище relay. Awaited-обработчик должен учитывать отмену и повторы. Постоянному checkpoint соответствует состояние приложения. Один provider владеет scope; независимые providers не должны использовать один scope/store. В Node-примере синтетические токены и журнал в памяти; это не production-аутентификация или хранилище.
+Библиотека не предоставляет exactly-once эффекты, постоянное состояние приложения, владение между вкладками и распределённое хранилище relay. Awaited-обработчик должен учитывать отмену и повторы. Постоянному checkpoint соответствует состояние приложения. Один provider владеет scope; независимые providers не должны использовать один scope/store. Node-пример проверяет DPoP-подписи и привязку token/key, но его login с выбором аккаунта и журнал в памяти — synthetic fixtures, не production OAuth или хранилище.
 
 Лицензия MIT: [LICENSE](LICENSE).
 
